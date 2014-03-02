@@ -137,10 +137,22 @@ module Spring
       stdout, stderr, stdin = streams = 3.times.map { client.recv_io }
       [STDOUT, STDERR, STDIN].zip(streams).each { |a, b| a.reopen(b) }
 
-      preload unless preloaded?
+      begin
+        require "spring/commands"
+      ensure
+        start_watcher
+      end
 
       args, env = JSON.load(client.read(client.gets.to_i)).values_at("args", "env")
       command   = Spring.command(args.shift)
+
+        # Delete all env vars which are unchanged from before spring started
+        original_env.each { |k, v| ENV.delete k if ENV[k] == v }
+
+        # Load in the current env vars, except those which *were* changed when spring started
+        env.each { |k, v| ENV[k] ||= v }
+
+      preload unless preloaded?
 
       connect_database
       setup command
