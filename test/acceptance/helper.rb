@@ -121,6 +121,10 @@ module Spring
         path "config/application.rb"
       end
 
+      def some_initializer
+        path "config/initializers/some.rb"
+      end
+
       def spring_config
         path "config/spring.rb"
       end
@@ -295,6 +299,7 @@ module Spring
           FileUtils.rm_rf(application.path("test/performance"))
 
           File.write(application.gemfile, "#{application.gemfile.read}gem 'spring', '#{Spring::VERSION}'\n")
+          File.write(application.some_initializer, "Rails.application.config.force_ssl = ('1' == ENV['FORCE_SSL'])\n")
 
           if version.needs_testunit?
             File.write(application.gemfile, "#{application.gemfile.read}gem 'spring-commands-testunit'\n")

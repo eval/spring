@@ -272,6 +272,16 @@ CODE
     assert_success "bin/rake -p 'Rails.env'", stdout: "test"
   end
 
+  test "config via environment variable" do
+    app.env['FORCE_SSL'] = '1'
+    app.env['RAILS_ENV'] = 'test'
+    assert_success "bin/rails runner 'p Rails.application.config.force_ssl'", stdout: "true"
+
+    app.env['FORCE_SSL'] = '0'
+    app.env['RAILS_ENV'] = 'development'
+    assert_success "bin/rails runner 'p Rails.application.config.force_ssl'", stdout: "false"
+  end
+
   test "setting env vars with rake" do
     File.write(app.path("lib/tasks/env.rake"), <<-'CODE')
       task :print_rails_env => :environment do
